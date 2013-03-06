@@ -14,7 +14,9 @@ import posixpath
 from fnmatch import fnmatch
 from urlparse import urlparse
 
-from docutils.core import publish_parts
+from docutils.core import publish_programmatically
+import docutils.io
+import docutils.core
 
 from jinja2 import Environment, FileSystemLoader, Markup
 
@@ -22,6 +24,8 @@ from babel import Locale, dates
 
 from werkzeug.routing import Map, Rule
 from werkzeug import url_unquote
+
+import yaml
 
 from rstblog.signals import before_file_processed, \
      before_template_rendered, before_build_finished, \
@@ -133,15 +137,53 @@ class Context(object):
     def render_rst(self, contents):
         settings = {
             'initial_header_level': self.config.get('rst_header_level', 2),
+            'syntax_highlight': 'short',
             'rstblog_context':      self
         }
-        parts = publish_parts(source=contents,
-                              writer_name='html4css1',
-                              settings_overrides=settings)
+        output, pub = publish_programmatically(
+            source=contents,
+            source_path=None,
+            source_class=docutils.io.StringInput,
+            destination=None,
+            destination_class=docutils.io.StringOutput,
+            destination_path=None,
+            reader=None, reader_name='standalone',
+            parser=None, parser_name='restructuredtext',
+            writer=None, writer_name='html4css1',
+            settings=None,
+            settings_spec=None,
+            settings_overrides=settings,
+            config_section=None,
+            enable_exit_status=False,
+        )
+        parts = pub.writer.parts
+        document = pub.document
+        metadata = {}
+        for docinfo in document.traverse(docutils.nodes.docinfo):
+            for element in docinfo.children:
+                if element.tagname == 'field':  # custom fields (e.g. summary)
+                    name_elem, body_elem = element.children
+                    name = name_elem.astext()
+                    value = body_elem.astext()
+                else:  # standard fields (e.g. address)
+                    name = element.tagname
+                    value = element.astext()
+                name = name.strip()
+                value = value.strip()
+                try:
+                    value = yaml.load(value)
+                except:
+                    pass
+                if name == 'tags' and isinstance(value, basestring):
+                    value = [i.strip() for i in value.split(',')]
+                metadata[name] = value
         return {
             'title':        Markup(parts['title']).striptags(),
             'html_title':   Markup(parts['html_title']),
-            'fragment':     Markup(parts['fragment'])
+            'fragment':     Markup(parts['fragment']),
+            'pub':          pub,
+            'document':     document,
+            'metadata':     metadata,
         }
 
     def render_contents(self):

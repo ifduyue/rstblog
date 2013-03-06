@@ -10,10 +10,8 @@
 """
 from __future__ import with_statement
 import os
-import yaml
 import shutil
 from datetime import datetime
-from StringIO import StringIO
 from weakref import ref
 
 
@@ -81,16 +79,9 @@ class RSTProgram(TemplatedProgram):
     _fragment_cache = None
 
     def prepare(self):
-        headers = ['---']
-        with self.context.open_source_file() as f:
-            for line in f:
-                line = line.rstrip()
-                if not line:
-                    break
-                headers.append(line)
-            title = self.parse_text_title(f)
+        cfg = self.publish()['metadata']
+        title = self.publish()['title']
 
-        cfg = yaml.load(StringIO('\n'.join(headers)))
         if cfg:
             if not isinstance(cfg, dict):
                 raise ValueError('expected dict config in file "%s", got: %.40r' \
@@ -119,29 +110,18 @@ class RSTProgram(TemplatedProgram):
         if title is not None:
             self.context.title = title
 
-    def parse_text_title(self, f):
-        buffer = []
-        for line in f:
-            line = line.rstrip()
-            if not line:
-                break
-            buffer.append(line)
-        return self.context.render_rst('\n'.join(buffer).decode('utf-8')).get('title')
-
-    def get_fragments(self):
+    def publish(self):
         if self._fragment_cache is not None:
             return self._fragment_cache
         with self.context.open_source_file() as f:
-            while f.readline().strip():
-                pass
             rv = self.context.render_rst(f.read().decode('utf-8'))
         self._fragment_cache = rv
         return rv
 
     def render_contents(self):
-        return self.get_fragments()['fragment']
+        return self.publish()['fragment']
 
     def get_template_context(self):
         ctx = TemplatedProgram.get_template_context(self)
-        ctx['rst'] = self.get_fragments()
+        ctx['rst'] = self.publish()
         return ctx
