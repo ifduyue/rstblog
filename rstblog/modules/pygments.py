@@ -33,6 +33,7 @@ class CodeBlock(Directive):
         'linenos': directives.flag,
         'linenostep': directives.positive_int,
         'emphasize-lines': directives.unchanged_required,
+        'hl_lines': directives.unchanged_required,
     }
     lexers = dict(
         none = TextLexer(),
@@ -47,7 +48,7 @@ class CodeBlock(Directive):
         code = u'\n'.join(self.content)
         lang = self.arguments[0].strip()
         linenos = 'linenos' in self.options
-        linespec = self.options.get('emphasize-lines') or self.options.get('hl_lines')
+        linespec = self.options.get('emphasize-lines') or self.options.get('hl_lines') or ''
         linenostep = self.options.get('linenostep')
         if linespec:
             try:
@@ -57,7 +58,7 @@ class CodeBlock(Directive):
                 document = self.state.document
                 return [document.reporter.warning(str(err), line=self.lineno)]
         else:
-            hl_lines = None
+            hl_lines = []
         kwargs = {
             'hl_lines': hl_lines,
             'linenos': linenos,
