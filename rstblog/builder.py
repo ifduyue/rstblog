@@ -378,8 +378,8 @@ class Builder(object):
         for context in contexts:
             if context.public and context.needs_build:
                 key = context.is_new and 'A' or 'U'
-                context.run()
                 print key, context.source_filename
+                context.run()
 
         before_build_finished.send(self)
 
