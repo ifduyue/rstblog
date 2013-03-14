@@ -34,6 +34,7 @@ class CodeBlock(Directive):
         'linenostep': directives.positive_int,
         'emphasize-lines': directives.unchanged_required,
         'hl_lines': directives.unchanged_required,
+        'noclasses': directives.unchanged,
     }
     lexers = dict(
         none = TextLexer(),
@@ -50,6 +51,12 @@ class CodeBlock(Directive):
         linenos = 'linenos' in self.options
         linespec = self.options.get('emphasize-lines') or self.options.get('hl_lines') or ''
         linenostep = self.options.get('linenostep')
+        noclasses = self.options.get('noclasses')
+        if 'noclasses' in self.options:
+            if noclasses.lower() in ('y', 'yes', '1', 'on', 'true', ''):
+                noclasses = True
+            elif noclasses.lower() in ('n', 'no', '0', 'off', 'false'):
+                noclasses = False
         if linespec:
             try:
                 nlines = len(self.content)
@@ -64,6 +71,8 @@ class CodeBlock(Directive):
             'linenos': linenos,
             'language': lang,
         }
+        if noclasses in (True, False):
+            kwargs['noclasses'] = noclasses
         if linenostep:
             kwargs['linenostep'] = linenostep
         try:
@@ -112,6 +121,7 @@ def write_stylesheet(builder, **kwargs):
 def setup(builder):
     global html_formatter
     style = get_style_by_name(builder.config.root_get('modules.pygments.style'))
+    noclasses = builder.config.root_get('modules.pygments.noclasses', False)
     class formatter_partial:
         def __init__(self, **kwargs):
             self.kwargs = kwargs
@@ -120,7 +130,7 @@ def setup(builder):
             kw = self.kwargs.copy()
             kw.update(kwargs)
             return HtmlFormatter(**kw)
-    html_formatter = formatter_partial(style=style)
+    html_formatter = formatter_partial(style=style, noclasses=noclasses)
     directives.register_directive('code-block', CodeBlock)
     directives.register_directive('sourcecode', CodeBlock)
     before_file_processed.connect(inject_stylesheet)
