@@ -123,6 +123,12 @@ def write_index_page(builder):
 
 
 def write_archive_pages(builder):
+    with builder.open_link_file('blog_archive_allinone') as f:
+        rv = builder.render_template('blog/archive_allinone.html', {
+                'entries': get_all_entries(builder),
+        })
+        f.write(rv.encode('utf-8') + '\n')
+
     archive = get_archive_summary(builder)
     with builder.open_link_file('blog_archive') as f:
         rv = builder.render_template('blog/archive.html', {
@@ -184,6 +190,9 @@ def setup(builder):
     builder.register_url('blog_archive',
                          config_key='modules.blog.month_archive_url',
                          config_default='/<year>/<month>/')
+    builder.register_url('blog_archive_allinone',
+                         config_key='modules.blog.blog_archive_allinone_url',
+                         config_default='/archive/all/')
     builder.register_url('blog_feed', config_key='modules.blog.feed_url',
                          config_default='/feed.atom')
     builder.jinja_env.globals.update(
