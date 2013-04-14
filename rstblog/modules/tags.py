@@ -22,7 +22,7 @@ from rstblog.signals import after_file_published, \
 class Tag(object):
 
     def __init__(self, name, count):
-        self.name = name
+        self.name = name if isinstance(name, unicode) else name.decode('utf8')
         self.count = count
         self.size = 100 + log(count or 1) * 20
 
@@ -77,13 +77,16 @@ def write_tagcloud_page(builder):
 def write_tag_feed(builder, tag):
     blog_author = builder.config.root_get('author')
     url = builder.config.root_get('canonical_url') or 'http://localhost/'
-    name = builder.config.get('feed.name') or u'Recent Blog Posts'
-    subtitle = builder.config.get('feed.subtitle') or u'Recent blog posts'
+    name = builder.config.get('feed.name') or u'Recent Blog Posts Tagged %s' % tag.name
+    subtitle = builder.config.get('feed.subtitle') or u'Recent blog posts tagged %s' % tag.name
     feed = AtomFeed(name,
                     subtitle=subtitle,
                     feed_url=urljoin(url, builder.link_to('blog_feed')),
                     url=url)
-    for entry in get_tagged_entries(builder, tag)[:10]:
+
+    entries = get_tagged_entries(builder, tag)
+    entries = [entry for entry in entries if entry.infeed]
+    for entry in entries[:10]:
         feed.add(entry.title, unicode(entry.render_contents()),
                  content_type='html', author=blog_author,
                  url=urljoin(url, entry.slug),

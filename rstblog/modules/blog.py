@@ -160,7 +160,8 @@ def write_feed(builder):
                     subtitle=subtitle,
                     feed_url=urljoin(url, builder.link_to('blog_feed')),
                     url=url)
-    for entry in get_all_entries(builder)[:10]:
+    entries = [entry for entry in get_all_entries(builder) if entry.infeed]
+    for entry in entries[:10]:
         feed.add(entry.title, unicode(entry.render_contents()),
                  content_type='html', author=blog_author,
                  url=urljoin(url, entry.slug),

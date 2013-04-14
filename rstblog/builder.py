@@ -79,6 +79,11 @@ class Context(object):
         return v in ['y', 'yes', 'true', 't']
 
     @property
+    def infeed(self):
+        v = str(self.config.get('infeed', 'y')).lower()
+        return v in ['y', 'yes', 'true', 't']
+
+    @property
     def slug(self):
         directory, filename = os.path.split(self.source_filename)
         basename, ext = os.path.splitext(filename)
