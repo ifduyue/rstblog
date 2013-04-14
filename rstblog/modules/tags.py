@@ -53,7 +53,7 @@ def get_tagged_entries(builder, tag):
     storage = builder.get_storage('tags')
     by_tag = storage.get('by_tag', {})
     entries = by_tag.get(tag) or []
-    entries.sort(key=lambda x: (x.pub_date, x.config.get('day-order', 0), reverse=True)
+    entries.sort(key=lambda x: (x.pub_date, x.config.get('day-order', 0)), reverse=True)
     return entries
 
 
