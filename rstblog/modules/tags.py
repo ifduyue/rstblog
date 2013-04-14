@@ -52,7 +52,9 @@ def get_tagged_entries(builder, tag):
         tag = tag.name
     storage = builder.get_storage('tags')
     by_tag = storage.get('by_tag', {})
-    return by_tag.get(tag) or []
+    entries = by_tag.get(tag) or []
+    entries.sort(key=lambda x: (x.pub_date, x.config.get('day-order', 0), reverse=True)
+    return entries
 
 
 def remember_tags(context):
@@ -92,7 +94,6 @@ def write_tag_feed(builder, tag):
 
 def write_tag_page(builder, tag):
     entries = get_tagged_entries(builder, tag)
-    entries.sort(key=lambda x: (x.title or '').lower())
     with builder.open_link_file('tag', tag=tag.name) as f:
         rv = builder.render_template('tag.html', {
             'tag':      tag,
