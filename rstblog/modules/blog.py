@@ -108,7 +108,7 @@ def get_recent_blog_entries(context, limit=10):
 def write_index_page(builder):
     use_pagination = builder.config.root_get('modules.blog.use_pagination', True)
     per_page = builder.config.root_get('modules.blog.per_page', 10)
-    entries = get_all_entries(builder)
+    entries = [entry for entry in get_all_entries(builder) if entry.inindex]
     pagination = Pagination(builder, entries, 1, per_page, 'blog_index')
     while 1:
         with builder.open_link_file('blog_index', page=pagination.page) as f:

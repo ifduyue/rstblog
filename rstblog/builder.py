@@ -84,6 +84,11 @@ class Context(object):
         return v in ['y', 'yes', 'true', 't']
 
     @property
+    def inindex(self):
+        v = str(self.config.get('inindex', 'y')).lower()
+        return v in ['y', 'yes', 'true', 't']
+
+    @property
     def slug(self):
         directory, filename = os.path.split(self.source_filename)
         basename, ext = os.path.splitext(filename)
