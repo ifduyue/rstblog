@@ -69,6 +69,11 @@ class Context(object):
             if self.public:
                 after_file_published.send(self)
 
+    def __repr__(self):
+        return '<Context(%s)>' % self.slug
+
+    __str__ = __repr__
+
     @property
     def is_new(self):
         return not os.path.exists(self.full_destination_filename)
@@ -81,6 +86,16 @@ class Context(object):
     @property
     def infeed(self):
         v = str(self.config.get('infeed', 'y')).lower()
+        return v in ['y', 'yes', 'true', 't']
+
+    @property
+    def inarchive(self):
+        v = str(self.config.get('inarchive', 'y')).lower()
+        return v in ['y', 'yes', 'true', 't']
+
+    @property
+    def intags(self):
+        v = str(self.config.get('intags', 'y')).lower()
         return v in ['y', 'yes', 'true', 't']
 
     @property

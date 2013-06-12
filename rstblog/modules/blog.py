@@ -97,6 +97,9 @@ def get_archive_summary(builder):
     storage = builder.get_storage('blog')
     years = storage.items()
     years.sort(key=lambda x: -x[0])
+    for year, months in years:
+        for month in months:
+            months[month] = [entry for entry in months[month] if entry.inarchive] 
     return [YearArchive(builder, year, months) for year, months in years]
 
 
