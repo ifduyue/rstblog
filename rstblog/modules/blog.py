@@ -128,7 +128,7 @@ def write_index_page(builder):
 def write_archive_pages(builder):
     with builder.open_link_file('blog_archive_allinone') as f:
         rv = builder.render_template('blog/archive_allinone.html', {
-                'entries': get_all_entries(builder),
+                'entries': [entry for entry in get_all_entries(builder) if entry.inarchive]
         })
         f.write(rv.encode('utf-8') + '\n')
 
