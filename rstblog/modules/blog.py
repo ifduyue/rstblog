@@ -98,8 +98,11 @@ def get_archive_summary(builder):
     years = storage.items()
     years.sort(key=lambda x: -x[0])
     for year, months in years:
-        for month in months:
+        for month in months.keys():
             months[month] = [entry for entry in months[month] if entry.inarchive] 
+            if not months[month]:
+                del months[month]
+
     return [YearArchive(builder, year, months) for year, months in years]
 
 
