@@ -13,6 +13,7 @@ import os
 import posixpath
 from fnmatch import fnmatch
 from urlparse import urlparse
+from datetime import datetime, timedelta
 
 from docutils.core import publish_programmatically
 import docutils.io
@@ -81,6 +82,10 @@ class Context(object):
     @property
     def public(self):
         v = str(self.config.get('public', 'y')).lower()
+        if v.startswith('in ') and v.endswith(' days') and self.pub_date:
+            days = int(v[3:-5])
+            now = datetime.now()
+            return datetime(year=now.year, month=now.month, day=now.day) - self.pub_date <= timedelta(days=days)
         return v in ['y', 'yes', 'true', 't']
 
     @property
