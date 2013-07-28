@@ -19,7 +19,7 @@ from werkzeug.routing import Rule, Map, NotFound
 from werkzeug.contrib.atom import AtomFeed
 
 from rstblog.signals import after_file_published, \
-     before_build_finished
+     before_build_finished, after_file_prepared
 from rstblog.utils import Pagination
 
 
@@ -63,7 +63,7 @@ def test_pattern(path, pattern):
     return values['year'], values['month'], values['day']
 
 
-def process_blog_entry(context):
+def process_blog_pub_date(context):
     if context.pub_date is None:
         pattern = context.config.get('modules.blog.pub_date_match',
                                      '/<int:year>/<int:month>/<int:day>/')
@@ -72,6 +72,9 @@ def process_blog_entry(context):
             if rv is not None:
                 context.pub_date = datetime(*rv)
 
+
+def process_blog_entry(context):
+    process_blog_pub_date(context)
     if context.pub_date is not None:
         context.builder.get_storage('blog') \
             .setdefault(context.pub_date.year, {}) \
@@ -184,6 +187,7 @@ def write_blog_files(builder):
 
 def setup(builder):
     after_file_published.connect(process_blog_entry)
+    after_file_prepared.connect(process_blog_pub_date)
     before_build_finished.connect(write_blog_files)
     builder.register_url('blog_index', config_key='modules.blog.index_url',
                          config_default='/', defaults={'page': 1})
