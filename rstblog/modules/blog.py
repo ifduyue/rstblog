@@ -184,13 +184,18 @@ def write_blog_files(builder):
     write_archive_pages(builder)
     write_feed(builder)
 
+    has_index = any(c for c in builder.contexts if c.source_filename in ('index.html', 'index.rst'))
+    print 'has_index', has_index
+    if not has_index:
+        import shutil, os
+        of = builder.default_output_folder
+        shutil.copy(os.path.join(of, 'page', '1', 'index.html'), os.path.join(of, 'index.html'))
+
 
 def setup(builder):
     after_file_published.connect(process_blog_entry)
     after_file_prepared.connect(process_blog_pub_date)
     before_build_finished.connect(write_blog_files)
-    builder.register_url('blog_index', config_key='modules.blog.index_url',
-                         config_default='/', defaults={'page': 1})
     builder.register_url('blog_index', config_key='modules.blog.paged_index_url',
                          config_default='/page/<page>/')
     builder.register_url('blog_archive', config_key='modules.blog.archive_url',

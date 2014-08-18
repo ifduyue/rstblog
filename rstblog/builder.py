@@ -403,7 +403,7 @@ class Builder(object):
 
     def run(self):
         self.storage.clear()
-        contexts = list(self.iter_contexts())
+        self.contexts = contexts = list(self.iter_contexts())
 
         for context in contexts:
             if context.public and context.needs_build:
