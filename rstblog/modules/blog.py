@@ -185,7 +185,6 @@ def write_blog_files(builder):
     write_feed(builder)
 
     has_index = any(c for c in builder.contexts if c.source_filename in ('index.html', 'index.rst'))
-    print 'has_index', has_index
     if not has_index:
         import shutil, os
         of = builder.default_output_folder
