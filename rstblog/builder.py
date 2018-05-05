@@ -12,7 +12,7 @@ import re
 import os
 import posixpath
 from fnmatch import fnmatch
-from urlparse import urlparse
+from urlparse import urlparse, urljoin
 from datetime import datetime, timedelta
 
 from docutils.core import publish_programmatically
@@ -115,6 +115,11 @@ class Context(object):
         if basename == 'index':
             return posixpath.join(directory, basename).rstrip('/').replace('\\', '/')
         return posixpath.join(directory, basename).replace('\\', '/')
+
+    @property
+    def url(self):
+        canonical_url = self.config.root_get('canonical_url')
+        return urljoin(canonical_url, self.slug)
 
     def make_destination_folder(self):
         folder = self.destination_folder

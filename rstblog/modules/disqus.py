@@ -20,6 +20,7 @@ import jinja2
 @jinja2.contextfunction
 def get_disqus(context):
     var_shortname=context['builder'].config.root_get('modules.disqus.shortname', 'YOUR-DISQUS-SHORTNAME')
+    ctx=context['ctx']
 
     var_developer=''
     if context['builder'].config.root_get('modules.disqus.developer', False):
@@ -30,15 +31,10 @@ def get_disqus(context):
 <script>
 var disqus_shortname = '%s'; // required: replace example with your forum shortname
 %s
-/**
-*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-/*
 var disqus_config = function () {
-this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+this.page.url = '%s';  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = '%s'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
 };
-*/
 (function() { // DON'T EDIT BELOW THIS LINE
 var d = document, s = d.createElement('script');
 s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
@@ -47,7 +43,7 @@ s.setAttribute('data-timestamp', +new Date());
 })();
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-""" % (var_shortname, var_developer)
+""" % (var_shortname, var_developer, ctx.url, ctx.slug)
 
     if not context['config'].get('disqus', True):
         disqus_txt='' # "<h1>DISQUS DEFEATED</h1>"
